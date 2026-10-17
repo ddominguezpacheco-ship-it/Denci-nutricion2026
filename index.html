@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#087f5b">
+<meta name="description" content="NutriScan de Denci David: lector de etiquetas, perfil, calculadora y juego Pong.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>NutriScan — Denci David</title>
+<style>
+:root{--green:#087f5b;--mint:#e8f7ef;--ink:#14231d;--muted:#64736b;--line:#dce7e0}
+*{box-sizing:border-box}body{margin:0;background:#f5f8f6;color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:linear-gradient(135deg,#064e3b,#0b8f63);color:white;padding:24px 18px 28px;border-radius:0 0 24px 24px}
+.wrap{max-width:720px;margin:auto;padding:0 16px}header .brand{font-size:26px;font-weight:800;letter-spacing:-.6px}header p{margin:6px 0 0;color:#d8f7e7}
+main{padding:18px 0 40px}.card{background:white;border:1px solid var(--line);border-radius:18px;padding:17px;margin-bottom:14px;box-shadow:0 4px 16px #12321a08}
+h2{font-size:18px;margin:0 0 8px}p.help{color:var(--muted);font-size:14px;margin:5px 0 12px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button,.button{border:0;border-radius:12px;padding:13px 14px;font-weight:700;font-size:15px;cursor:pointer;text-align:center}
+.primary{background:var(--green);color:white}.secondary{background:var(--mint);color:#075c43}
+input[type=file]{display:none}.preview{display:none;width:100%;max-height:360px;object-fit:contain;background:#f0f4f1;border-radius:12px;margin-top:12px}
+.status{font-size:13px;color:var(--muted);margin-top:10px;min-height:18px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.nutrient{background:#f7faf8;border:1px solid var(--line);border-radius:14px;padding:12px 9px;text-align:center}
+.nutrient .num{font-size:23px;font-weight:800;color:var(--green);overflow-wrap:anywhere}
+.nutrient .unit{font-size:12px;color:var(--muted)}.nutrient label{font-size:12px;font-weight:700;display:block}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label.field{font-size:13px;font-weight:700;color:#34483d}
+input[type=number],input[type=text],select{display:block;width:100%;margin-top:5px;padding:12px;border:1px solid #cbd9d0;border-radius:10px;background:white;font:inherit;color:var(--ink)}
+.wide{grid-column:1/-1}.note{font-size:12px;color:var(--muted)}
+.result-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pill{font-size:11px;background:#fff3d9;color:#7b4d00;padding:5px 8px;border-radius:20px;font-weight:700}
+.history-item{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}.history-item:last-child{border:0}
+.history-item small{display:block;color:var(--muted)}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:0 18px 25px}
+@media(max-width:400px){.grid{gap:5px}.nutrient{padding:10px 4px}.nutrient .num{font-size:19px}.actions{grid-template-columns:1fr}}
+
+.appnav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0 0 14px;position:sticky;top:0;z-index:5;background:#f5f8f6;padding:8px 0}.navbtn{padding:10px 4px;font-size:12px;background:#e8f7ef;color:#075c43}.navbtn.active{background:#087f5b;color:white}.app-panel{scroll-margin-top:76px}.fields .wide{grid-column:1/-1}.calcgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.calcgrid button{background:#edf3ef;color:#14231d;min-height:52px;font-size:18px}.calcgrid button.primary{background:#087f5b;color:#fff}.calc-zero{grid-column:span 2}#pongCanvas{display:block;width:100%;height:auto;background:#101c18;border-radius:12px;border:1px solid #dce7e0;touch-action:manipulation}.pong-controls{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:7px;margin-top:10px}.pong-controls button{padding:12px 5px;font-size:13px}.appnav button{white-space:nowrap}@media(max-width:360px){.navbtn{font-size:10px}.pong-controls button{font-size:11px;padding:10px 3px}}
+
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="brand"><span style="display:inline-flex;align-items:center;gap:9px"><img src="icon.svg" alt="" style="width:42px;height:42px;vertical-align:middle;border-radius:12px"> NutriScan</span></div><p>Toma una foto de la etiqueta y revisa sus datos nutricionales.</p><p style="font-size:13px;font-weight:800;letter-spacing:.4px;color:#e8f7ef;margin-top:10px">✦ EDICIÓN PERSONAL · DENCI DAVID</p></div></header>
+<main class="wrap">
+<nav class="appnav" aria-label="Secciones NutriScan">
+<button class="navbtn active" data-target="scanner">🥗 NutriScan</button><button class="navbtn" data-target="profile">👤 Perfil</button><button class="navbtn" data-target="calculator">🧮 Calculadora</button><button class="navbtn" data-target="pong">🏓 Pong</button>
+</nav>
+<section class="card app-panel" id="profile">
+<h2>👤 Mi perfil</h2><p class="help">Tus datos se guardan en este dispositivo.</p>
+<div class="fields"><label class="field">Nombre<input id="profileName" type="text" placeholder="Tu nombre" autocomplete="name"></label><label class="field">Edad<input id="profileAge" type="number" min="1" max="120" placeholder="Años"></label><label class="field">Peso (kg)<input id="profileWeight" type="number" min="1" max="500" step="0.1" placeholder="Ej. 65"></label><label class="field">Altura (cm)<input id="profileHeight" type="number" min="30" max="260" step="0.1" placeholder="Ej. 165"></label><label class="field wide">Mi objetivo<select id="profileGoal"><option value="comer mejor">Comer mejor</option><option value="mantener peso">Mantener mi peso</option><option value="ganar masa muscular">Ganar masa muscular</option><option value="perder peso">Perder peso</option></select></label></div>
+<button class="primary" id="saveProfile" style="width:100%;margin-top:14px">Guardar perfil</button><p id="profileStatus" class="status" aria-live="polite"></p>
+</section>
+<section class="card app-panel" id="calculator"><h2>🧮 Calculadora</h2><p class="help">Realiza operaciones básicas. Puedes usar los botones o el teclado.</p><input id="calcDisplay" type="text" inputmode="decimal" aria-label="Pantalla de calculadora" placeholder="0" readonly style="font-size:28px;text-align:right;font-weight:700"><div class="calcgrid">
+<button class="secondary" data-calc="clear">AC</button><button class="secondary" data-calc="back">⌫</button><button class="secondary" data-value="%">%</button><button class="secondary" data-value="/">÷</button>
+<button data-value="7">7</button><button data-value="8">8</button><button data-value="9">9</button><button class="secondary" data-value="*">×</button>
+<button data-value="4">4</button><button data-value="5">5</button><button data-value="6">6</button><button class="secondary" data-value="-">−</button>
+<button data-value="1">1</button><button data-value="2">2</button><button data-value="3">3</button><button class="secondary" data-value="+">+</button>
+<button data-value="0" class="calc-zero">0</button><button data-value=".">.</button><button class="primary" data-calc="equals">=</button></div><p id="calcStatus" class="status" aria-live="polite"></p></section>
+<section class="card app-panel" id="pong"><h2>🏓 Pong</h2><p class="help">Mueve tu paleta con los botones de abajo. ¡Intenta devolver la pelota!</p><canvas id="pongCanvas" width="600" height="360" aria-label="Juego Pong" role="img"></canvas><div class="pong-controls"><button class="secondary" id="paddleUp">▲ Subir</button><button class="primary" id="pongStart">▶ Jugar / Pausar</button><button class="secondary" id="paddleDown">▼ Bajar</button></div><p id="pongScore" class="status" aria-live="polite">Tú: 0 · CPU: 0. Pulsa Jugar para empezar.</p><button id="pongReset" class="secondary" style="width:100%">Reiniciar partida</button></section>
+<div class="app-panel" id="scanner">
+
+<section class="card">
+<h2>1. Fotografía la etiqueta nutricional</h2>
+<p class="help">Enfoca la tabla donde aparecen calorías, proteína y azúcares. Para mejores resultados, usa buena luz y una foto nítida.</p>
+<div class="actions">
+<label class="button primary" for="camera">📷 Tomar foto</label>
+<label class="button secondary" for="gallery">🖼️ Elegir foto</label>
+<input id="camera" type="file" accept="image/*" capture="environment">
+<input id="gallery" type="file" accept="image/*">
+</div>
+<img id="preview" class="preview" alt="Vista previa de la etiqueta">
+<div id="status" class="status">Listo para escanear. El reconocimiento de texto necesita conexión a internet.</div>
+<button id="scan" class="primary" style="width:100%;margin-top:8px" disabled>Leer texto de la foto</button>
+</section>
+
+<section class="card">
+<div class="result-head"><h2>2. Datos detectados</h2><span class="pill">Revisa antes de guardar</span></div>
+<p class="help">El lector intentará reconocer los números de la etiqueta. Corrige los campos si hace falta.</p>
+<label class="field">Nombre del alimento
+<input id="food" type="text" placeholder="Ej. Yogur natural"></label>
+<div class="fields" style="margin-top:12px">
+<label class="field">Porción indicada
+<input id="serving" type="text" placeholder="Ej. 100 g"></label>
+<label class="field">Unidad de referencia
+<select id="basis"><option value="por porción">Por porción</option><option value="por 100 g/ml">Por 100 g/ml</option></select></label>
+</div>
+<div class="grid" style="margin-top:14px">
+<div class="nutrient"><label>Calorías</label><div class="num" id="kcalShow">—</div><div class="unit">kcal</div></div>
+<div class="nutrient"><label>Proteína</label><div class="num" id="proteinShow">—</div><div class="unit">gramos</div></div>
+<div class="nutrient"><label>Azúcar</label><div class="num" id="sugarShow">—</div><div class="unit">gramos</div></div>
+</div>
+<div class="fields" style="margin-top:12px">
+<label class="field">Calorías (kcal)<input id="kcal" type="number" min="0" step="any" placeholder="0"></label>
+<label class="field">Proteína (g)<input id="protein" type="number" min="0" step="any" placeholder="0"></label>
+<label class="field wide">Azúcar (g)<input id="sugar" type="number" min="0" step="any" placeholder="0"></label>
+</div>
+<button id="save" class="primary" style="width:100%;margin-top:14px">Guardar en mi historial</button>
+<p class="note">Los valores corresponden a la porción o referencia elegida en la etiqueta; no necesariamente a todo el paquete.</p>
+</section>
+
+<section class="card">
+<div class="result-head"><h2>Mi historial</h2><button id="clear" class="secondary" style="padding:8px 10px;font-size:12px">Borrar historial</button></div>
+<div id="history"><p class="help">Todavía no has guardado alimentos.</p></div>
+</section>
+</div>
+</main>
+<footer>NutriScan es una herramienta orientativa. Una foto de un plato sin etiqueta solo permite estimar nutrientes; no ofrece resultados exactos. Los datos se guardan en este navegador.</footer>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+let selectedFile=null;
+const num = v => v===''||v===null ? '—' : String(Number(v));
+function updateCards(){ $('kcalShow').textContent=num($('kcal').value); $('proteinShow').textContent=num($('protein').value); $('sugarShow').textContent=num($('sugar').value); }
+['kcal','protein','sugar'].forEach(id=>$(id).addEventListener('input',updateCards));
+function chooseFile(file){
+ if(!file)return; selectedFile=file;
+ const url=URL.createObjectURL(file); $('preview').src=url; $('preview').style.display='block';
+ $('scan').disabled=false; $('status').textContent='Foto cargada. Pulsa “Leer texto de la foto”.';
+}
+$('camera').addEventListener('change',e=>chooseFile(e.target.files[0]));
+$('gallery').addEventListener('change',e=>chooseFile(e.target.files[0]));
+function parseNutrition(text){
+ const clean=text.replace(/,/g,'.').replace(/[|]/g,'I');
+ const find=(patterns)=>{for(const p of patterns){const m=clean.match(p);if(m)return Number(m[1]);}return null;};
+ const kcal=find([/(?:energ[ií]a|calor[ií]as|energy|calories|kcal)[^\\d]{0,25}(\\d{1,5}(?:\\.\\d+)?)/i,/(\\d{1,5}(?:\\.\\d+)?)\\s*kcal/i]);
+ const protein=find([/(?:prote[ií]nas?|protein)[^\\d]{0,25}(\\d{1,4}(?:\\.\\d+)?)/i]);
+ const sugar=find([/(?:az[uú]cares?|az[uú]car|sugars?|sugar)[^\\d]{0,25}(\\d{1,4}(?:\\.\\d+)?)/i]);
+ if(kcal!==null)$('kcal').value=kcal;
+ if(protein!==null)$('protein').value=protein;
+ if(sugar!==null)$('sugar').value=sugar;
+ updateCards(); return {kcal,protein,sugar};
+}
+$('scan').addEventListener('click',async()=>{
+ if(!selectedFile)return;
+ if(!window.Tesseract){$('status').textContent='No se pudo cargar el lector. Comprueba tu conexión e inténtalo otra vez.';return;}
+ $('scan').disabled=true; $('status').textContent='Leyendo la foto… puede tardar unos segundos.';
+ try{
+  const result=await Tesseract.recognize(selectedFile,'spa+eng',{logger:m=>{if(m.status==='recognizing text')$('status').textContent='Reconociendo texto: '+Math.round(m.progress*100)+'%';}});
+  const text=result.data.text||''; const found=parseNutrition(text);
+  if(!text.trim()) $('status').textContent='No se detectó texto. Prueba con una foto más nítida y de frente.';
+  else {
+   const foundCount=[found.kcal,found.protein,found.sugar].filter(v=>v!==null).length;
+   $('status').textContent=foundCount===3?'Lectura terminada. Revisa los tres valores antes de guardar.':'Texto leído, pero no se reconocieron todos los valores automáticamente. Completa o corrige los campos.';
+   if(!$('food').value)$('food').value='Alimento escaneado';
+  }
+ }catch(e){$('status').textContent='No se pudo leer la foto. Comprueba tu conexión y vuelve a intentarlo.';}
+ $('scan').disabled=false;
+});
+function getHistory(){try{return JSON.parse(localStorage.getItem('nutriscan_history')||'[]')}catch(e){return []}}
+function renderHistory(){
+ const items=getHistory(); const root=$('history');
+ if(!items.length){root.innerHTML='<p class="help">Todavía no has guardado alimentos.</p>';return;}
+ root.innerHTML='';
+ items.slice().reverse().forEach(item=>{
+  const div=document.createElement('div');div.className='history-item';
+  const left=document.createElement('div');left.textContent=item.food;
+  const small=document.createElement('small');small.textContent=item.date+' · '+item.basis;left.appendChild(small);
+  const right=document.createElement('div');right.style.textAlign='right';right.innerHTML='<strong>'+item.kcal+' kcal</strong>';
+  const s=document.createElement('small');s.textContent='Prot. '+item.protein+' g · Azúcar '+item.sugar+' g';right.appendChild(s);
+  div.append(left,right);root.appendChild(div);
+ });
+}
+$('save').addEventListener('click',()=>{
+ const food=$('food').value.trim()||'Alimento sin nombre';
+ const kcal=$('kcal').value, protein=$('protein').value, sugar=$('sugar').value;
+ if(kcal===''||protein===''||sugar===''){alert('Completa calorías, proteína y azúcar antes de guardar.');return;}
+ const items=getHistory();items.push({food,kcal,protein,sugar,basis:$('basis').value,serving:$('serving').value,date:new Date().toLocaleDateString('es-HN')});
+ localStorage.setItem('nutriscan_history',JSON.stringify(items));renderHistory();
+});
+$('clear').addEventListener('click',()=>{if(confirm('¿Borrar todo el historial de este navegador?')){localStorage.removeItem('nutriscan_history');renderHistory();}});
+renderHistory();
+
+// Secciones de la aplicación
+ document.querySelectorAll('.navbtn').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b===btn));const target=document.getElementById(btn.dataset.target);if(target)target.scrollIntoView({behavior:'smooth',block:'start'});}));
+// Perfil local
+const profileIds=['profileName','profileAge','profileWeight','profileHeight','profileGoal'];
+try{const savedProfile=JSON.parse(localStorage.getItem('nutriscan_profile')||'{}');profileIds.forEach(id=>{if(savedProfile[id]!==undefined)$(id).value=savedProfile[id];});}catch(e){}
+$('saveProfile').addEventListener('click',()=>{const data={};profileIds.forEach(id=>data[id]=$(id).value);localStorage.setItem('nutriscan_profile',JSON.stringify(data));$('profileStatus').textContent='Perfil guardado en este dispositivo.';});
+// Calculadora sin eval: solo operaciones matemáticas básicas
+const display=$('calcDisplay');let calcExpr='';
+function showCalc(){display.value=calcExpr||'0';}
+document.querySelectorAll('[data-value]').forEach(btn=>btn.addEventListener('click',()=>{const v=btn.dataset.value;if(v==='%'&&calcExpr){const m=calcExpr.match(/(\d+(?:\.\d+)?)$/);if(m)calcExpr=calcExpr.slice(0,-m[1].length)+String(Number(m[1])/100);}else if('+-*/'.includes(v)){if(!calcExpr&&v!=='-')return;if(/[+\-*/.]$/.test(calcExpr))calcExpr=calcExpr.slice(0,-1)+v;else calcExpr+=v;}else if(v==='.' ){const last=calcExpr.split(/[+\-*/]/).pop();if(!last.includes('.'))calcExpr+=last?' .'.trim(): '0.';}else{calcExpr+=v;}showCalc();}));
+document.querySelector('[data-calc="clear"]').addEventListener('click',()=>{calcExpr='';$('calcStatus').textContent='';showCalc();});
+document.querySelector('[data-calc="back"]').addEventListener('click',()=>{calcExpr=calcExpr.slice(0,-1);showCalc();});
+document.querySelector('[data-calc="equals"]').addEventListener('click',()=>{try{if(!calcExpr||!/^[-+*/.0-9 ]+$/.test(calcExpr)||/[+\-*/.]$/.test(calcExpr))throw Error();const tokens=calcExpr.match(/(?:\d+\.?\d*|\.\d+|[+*/-])/g);let nums=[],ops=[],expectNum=true;for(const t of tokens){if(expectNum){if(!/^[-+]?(?:\d+\.?\d*|\.\d+)$/.test(t))throw Error();nums.push(Number(t));expectNum=false;}else{if(!/^[+*/-]$/.test(t))throw Error();ops.push(t);expectNum=true;}}if(expectNum||nums.length!==ops.length+1)throw Error();for(let i=0;i<ops.length;){if(ops[i]==='*'||ops[i]==='/'){const n=ops[i]==='*'?nums[i]*nums[i+1]:nums[i]/nums[i+1];if(!Number.isFinite(n))throw Error();nums.splice(i,2,n);ops.splice(i,1);}else i++;}let result=nums[0];ops.forEach((op,i)=>{result=op==='+'?result+nums[i+1]:result-nums[i+1];});if(!Number.isFinite(result))throw Error();calcExpr=String(Number(result.toPrecision(12)));showCalc();$('calcStatus').textContent='Resultado';}catch(e){$('calcStatus').textContent='Operación no válida. Pulsa AC e inténtalo de nuevo.';}});
+// Pong canvas adaptable a móvil, jugador a la izquierda y rival automático
+(()=>{const canvas=$('pongCanvas'),ctx=canvas.getContext('2d');let py=145,cy=145,bx=300,by=180,vx=4,vy=2.5,player=0,cpu=0,running=false,raf=0;const W=600,H=360,ph=74,pw=12,br=8;function resetBall(dir=1){bx=W/2;by=H/2;vx=4*dir;vy=(Math.random()*3+1.5)*(Math.random()<.5?-1:1);}function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#f4fff8';for(let y=0;y<H;y+=22)ctx.fillRect(W/2-2,y,4,12);ctx.fillStyle='#54d6a0';ctx.fillRect(22,py,pw,ph);ctx.fillStyle='#e7f7ed';ctx.fillRect(W-34,cy,pw,ph);ctx.beginPath();ctx.arc(bx,by,br,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.font='bold 25px system-ui';ctx.fillStyle='#d8f7e7';ctx.textAlign='center';ctx.fillText(player,W/2-45,35);ctx.fillText(cpu,W/2+45,35);}function frame(){if(!running)return;bx+=vx;by+=vy;if(by<br||by>H-br)vy*=-1;cy+=(by-(cy+ph/2))*.055;cy=Math.max(0,Math.min(H-ph,cy));if(bx<34+br&&bx>22&&by>py-br&&by<py+ph+br){vx=Math.abs(vx)*1.04;bx=35+br;}if(bx>W-34-br&&bx<W-22&&by>cy-br&&by<cy+ph+br){vx=-Math.abs(vx)*1.04;bx=W-35-br;}if(bx<0){cpu++;resetBall(1);}if(bx>W){player++;resetBall(-1);}py=Math.max(0,Math.min(H-ph,py));$('pongScore').textContent='Tú: '+player+' · CPU: '+cpu+(running?'':' · En pausa');draw();raf=requestAnimationFrame(frame);}function start(){running=!running;$('pongStart').textContent=running?'⏸ Pausar':'▶ Jugar / Pausar';if(running){cancelAnimationFrame(raf);frame();}else{cancelAnimationFrame(raf);$('pongScore').textContent='Tú: '+player+' · CPU: '+cpu+' · En pausa';draw();}}$('pongStart').addEventListener('click',start);$('pongReset').addEventListener('click',()=>{running=false;cancelAnimationFrame(raf);player=0;cpu=0;py=145;cy=145;resetBall();$('pongStart').textContent='▶ Jugar / Pausar';$('pongScore').textContent='Tú: 0 · CPU: 0. Pulsa Jugar para empezar.';draw();});$('paddleUp').addEventListener('click',()=>{py-=40;draw();});$('paddleDown').addEventListener('click',()=>{py+=40;draw();});canvas.addEventListener('touchmove',e=>{const r=canvas.getBoundingClientRect();py=((e.touches[0].clientY-r.top)/r.height)*H-ph/2;e.preventDefault();},{passive:false});canvas.addEventListener('mousemove',e=>{if(e.buttons){const r=canvas.getBoundingClientRect();py=((e.clientY-r.top)/r.height)*H-ph/2;}});draw();})();
+
+</script>
+<script>if("serviceWorker" in navigator && location.protocol.startsWith("http")){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script>
+</body></html>
