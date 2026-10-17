@@ -104,17 +104,15 @@ analyze.addEventListener('click', async () => {
    classifier = await transformers.pipeline('zero-shot-image-classification','Xenova/clip-vit-base-patch32',{device:'wasm', progress_callback: p => { if (p.status === 'progress' && p.progress != null) statusEl.textContent = 'Descargando modelo: ' + Math.round(p.progress) + '%'; else if (p.status) statusEl.textContent = 'Preparando modelo: ' + p.status; }});
   }
   statusEl.textContent = 'Optimizando la foto y analizando…';
-  let imageForModel = selectedFile;
-  if ('createImageBitmap' in window) {
-   const bitmap = await createImageBitmap(selectedFile);
-   const scale = Math.min(1, 384 / Math.max(bitmap.width, bitmap.height));
-   const canvas = document.createElement('canvas');
-   canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-   canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-   canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-   bitmap.close(); imageForModel = canvas;
+  // Use the visible preview image directly; this is more compatible with
+  // mobile browsers than passing a canvas or raw file to the image pipeline.
+  if (!preview.complete || !preview.naturalWidth) {
+   await new Promise((resolve, reject) => {
+    preview.onload = resolve;
+    preview.onerror = () => reject(new Error('No se pudo cargar la foto seleccionada.'));
+   });
   }
-  const predictions = await classifier(imageForModel, foods.map(f => 'a photo of ' + f[0]), {top_k:3});
+  const predictions = await classifier(preview, foods.map(f => 'a photo of ' + f[0]), {top_k:3});
   if (!predictions || !predictions.length) throw new Error('El modelo no devolvió resultados.');
   const best = predictions[0];
   const idx = foods.findIndex(f => 'a photo of ' + f[0] === best.label);
