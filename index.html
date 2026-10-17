@@ -191,7 +191,7 @@ document.querySelector('[data-calc="equals"]').addEventListener('click',()=>{try
 </script>
 <script>if("serviceWorker" in navigator && location.protocol.startsWith("http")){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script>
 
-<script type="module">
+<script>
 // Cargar el modelo solo cuando el usuario pulse analizar.
 let pipeline = null;
 let foodClassifier = null;
