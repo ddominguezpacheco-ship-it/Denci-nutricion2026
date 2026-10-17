@@ -165,8 +165,8 @@ function renderHistory(){
 $('save').addEventListener('click',()=>{
  const food=$('food').value.trim()||'Alimento sin nombre';
  const kcal=$('kcal').value, protein=$('protein').value, sugar=$('sugar').value;
- if(kcal===''||protein===''||sugar===''){alert('Completa calorías, proteína y azúcar antes de guardar.');return;}
- const items=getHistory();items.push({food,kcal,protein,sugar,basis:$('basis').value,serving:$('serving').value,date:new Date().toLocaleDateString('es-HN')});
+ if(kcal===''){alert('Primero estima o escribe las calorías antes de guardar.');return;}
+ const items=getHistory();items.push({food,kcal,protein:protein||'—',sugar:sugar||'—',basis:$('basis').value,serving:$('serving').value,date:new Date().toLocaleDateString('es-HN')});
  localStorage.setItem('nutriscan_history',JSON.stringify(items));renderHistory();
 });
 $('clear').addEventListener('click',()=>{if(confirm('¿Borrar todo el historial de este navegador?')){localStorage.removeItem('nutriscan_history');renderHistory();}});
@@ -230,7 +230,7 @@ btn.addEventListener('click', async()=>{
  try{
   if(!foodClassifier) foodClassifier=await pipeline('zero-shot-image-classification','Xenova/clip-vit-base-patch32',{device:'wasm'});
   out.textContent='Analizando la foto…';
-  const results=await foodClassifier(file,foodOptions.map(x=>'a photo of '+x[0]),{top_k:3});
+  const imageUrl=URL.createObjectURL(file); let results; try { results=await foodClassifier(imageUrl,foodOptions.map(x=>'a photo of '+x[0]),{top_k:3}); } finally { URL.revokeObjectURL(imageUrl); }
   if(!results || !results.length) throw new Error('No se pudo identificar la comida.');
   const best=results[0], index=foodOptions.findIndex(x=>('a photo of '+x[0])===best.label);
   if(index<0) throw new Error('No se pudo relacionar la predicción con un alimento.');
