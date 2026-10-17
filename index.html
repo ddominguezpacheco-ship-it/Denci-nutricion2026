@@ -60,8 +60,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:0 18px 25px}
 <div class="app-panel" id="scanner">
 
 <section class="card">
-<h2>1. Fotografía la etiqueta nutricional</h2>
-<p class="help">Enfoca la tabla donde aparecen calorías, proteína y azúcares. Para mejores resultados, usa buena luz y una foto nítida.</p>
+<h2>1. Fotografía tu plato de comida</h2>
+<p class="help">Toma una foto del plato completo, con buena luz y desde arriba. NutriScan intentará identificar el tipo de comida y estimar sus calorías. Necesitas internet.</p>
 <div class="actions">
 <label class="button primary" for="camera">📷 Tomar foto</label>
 <label class="button secondary" for="gallery">🖼️ Elegir foto</label>
@@ -69,8 +69,10 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:0 18px 25px}
 <input id="gallery" type="file" accept="image/*">
 </div>
 <img id="preview" class="preview" alt="Vista previa de la etiqueta">
-<div id="status" class="status">Listo para escanear. El reconocimiento de texto necesita conexión a internet.</div>
-<button id="scan" class="primary" style="width:100%;margin-top:8px" disabled>Leer texto de la foto</button>
+<div id="status" class="status">Listo para fotografiar tu comida.</div>
+<button id="analyzePlate" class="primary" style="width:100%;margin-top:8px" disabled>🍽️ Identificar comida y estimar calorías</button>
+<div id="plateResult" class="status" aria-live="polite"></div>
+<button id="scan" class="secondary" style="width:100%;margin-top:8px" disabled>Leer texto de una etiqueta (opcional)</button>
 </section>
 
 <section class="card">
@@ -108,14 +110,14 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:0 18px 25px}
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
 const $=id=>document.getElementById(id);
-let selectedFile=null;
+let selectedFile=null; window.selectedFile=null;
 const num = v => v===''||v===null ? '—' : String(Number(v));
 function updateCards(){ $('kcalShow').textContent=num($('kcal').value); $('proteinShow').textContent=num($('protein').value); $('sugarShow').textContent=num($('sugar').value); }
 ['kcal','protein','sugar'].forEach(id=>$(id).addEventListener('input',updateCards));
 function chooseFile(file){
- if(!file)return; selectedFile=file;
+ if(!file)return; selectedFile=file; window.selectedFile=file;
  const url=URL.createObjectURL(file); $('preview').src=url; $('preview').style.display='block';
- $('scan').disabled=false; $('status').textContent='Foto cargada. Pulsa “Leer texto de la foto”.';
+ $('scan').disabled=false; $('analyzePlate').disabled=false; $('status').textContent='Foto cargada. Pulsa “Identificar comida y estimar calorías”.';
 }
 $('camera').addEventListener('change',e=>chooseFile(e.target.files[0]));
 $('gallery').addEventListener('change',e=>chooseFile(e.target.files[0]));
@@ -188,4 +190,67 @@ document.querySelector('[data-calc="equals"]').addEventListener('click',()=>{try
 
 </script>
 <script>if("serviceWorker" in navigator && location.protocol.startsWith("http")){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script>
+
+<script type="module">
+import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2';
+env.allowLocalModels = false;
+let foodClassifier = null;
+const foodOptions = [
+ ['grilled chicken with rice and salad','Pollo con arroz y ensalada',500,750],
+ ['fried chicken with french fries','Pollo frito con papas fritas',650,1000],
+ ['rice and beans with chicken','Arroz con frijoles y pollo',550,850],
+ ['rice and beans','Arroz con frijoles',350,600],
+ ['beef with rice and salad','Carne de res con arroz y ensalada',500,800],
+ ['fried fish with rice','Pescado frito con arroz',500,850],
+ ['scrambled eggs with tortillas','Huevos revueltos con tortillas',300,500],
+ ['beans, cheese and tortillas','Frijoles, queso y tortillas',350,650],
+ ['pasta with tomato sauce','Pasta con salsa',350,650],
+ ['hamburger and french fries','Hamburguesa con papas',700,1100],
+ ['pizza','Pizza',250,400],
+ ['salad with vegetables','Ensalada de vegetales',100,300],
+ ['vegetable soup','Sopa de verduras',150,350],
+ ['chicken soup','Sopa de pollo',250,500],
+ ['beef soup with vegetables','Sopa de res con verduras',300,600],
+ ['tamales','Tamales',300,600],
+ ['tacos','Tacos',350,700],
+ ['pupusas','Pupusas',300,600],
+ ['fried plantains with beans','Plátano frito con frijoles',350,650],
+ ['sandwich','Sándwich',300,600],
+ ['sushi','Sushi',300,600],
+ ['steak with potatoes','Bistec con papas',500,850],
+ ['fish with vegetables','Pescado con verduras',300,600],
+ ['rice with vegetables','Arroz con verduras',250,500],
+ ['a plate of food with meat, rice and vegetables','Plato combinado de carne, arroz y verduras',450,800]
+];
+const btn=document.getElementById('analyzePlate'), out=document.getElementById('plateResult');
+btn.addEventListener('click', async()=>{
+ const file=window.selectedFile;
+ if(!file){out.textContent='Primero toma o elige una foto.';return;}
+ btn.disabled=true; out.textContent='Preparando el reconocimiento de comida. La primera vez puede tardar y descargar un modelo grande…';
+ try{
+  if(!foodClassifier) foodClassifier=await pipeline('zero-shot-image-classification','Xenova/clip-vit-base-patch32',{device:'wasm'});
+  out.textContent='Analizando la foto…';
+  const results=await foodClassifier(file,foodOptions.map(x=>'a photo of '+x[0]),{top_k:3});
+  if(!results || !results.length) throw new Error('No se pudo identificar la comida.');
+  const best=results[0], index=foodOptions.findIndex(x=>('a photo of '+x[0])===best.label);
+  if(index<0) throw new Error('No se pudo relacionar la predicción con un alimento.');
+  const item=foodOptions[index], confidence=Math.round((best.score||0)*100);
+  document.getElementById('food').value=item[1]+' (estimado)';
+  document.getElementById('kcal').value=Math.round((item[2]+item[3])/2);
+  document.getElementById('protein').value='';
+  document.getElementById('sugar').value='';
+  updateCards();
+  out.innerHTML='';
+  const title=document.createElement('strong');title.textContent='Posible comida: '+item[1];out.appendChild(title);
+  const line=document.createElement('p');line.textContent='Estimación orientativa para un plato: '+item[2]+'–'+item[3]+' kcal. Confianza visual del modelo: '+confidence+'% (no equivale a exactitud nutricional).';out.appendChild(line);
+  const note=document.createElement('p');note.textContent='Revisa si acertó. La foto por sí sola no mide el peso ni detecta con certeza todos los ingredientes, el aceite o las salsas. Ajusta las calorías antes de guardar.';out.appendChild(note);
+  if(results.length>1){const small=document.createElement('small');small.textContent='Otras posibilidades: '+results.slice(1).map(r=>{const x=foodOptions.find(o=>'a photo of '+o[0]===r.label);return x?x[1]:r.label}).join(', ');out.appendChild(small);}
+  document.getElementById('status').textContent='Análisis terminado. Revisa la estimación antes de guardarla.';
+ }catch(err){
+  console.error(err);
+  out.textContent='No se pudo analizar la foto. Comprueba que tengas internet y vuelve a intentarlo. Si es la primera vez, espera a que cargue el modelo. Detalle: '+(err?.message||'error de carga');
+ }finally{btn.disabled=false;}
+});
+</script>
+
 </body></html>
