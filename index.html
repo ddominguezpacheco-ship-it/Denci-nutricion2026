@@ -96,18 +96,25 @@ analyze.addEventListener('click', async () => {
  if (!selectedFile) { statusEl.textContent='Primero toma o elige una foto.'; return; }
  analyze.disabled = true;
  resultEl.classList.add('hidden');
- statusEl.textContent = 'Preparando el reconocimiento. La primera vez puede tardar varios minutos mientras se descarga el modelo. No cierres esta página.';
+ statusEl.textContent = 'Cargando el reconocedor por primera vez… puede tardar un poco. Después, los siguientes análisis serán más rápidos.';
  try {
   if (!classifier) {
    const transformers = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2');
    transformers.env.allowLocalModels = false;
-   classifier = await transformers.pipeline('zero-shot-image-classification','Xenova/clip-vit-base-patch32',{device:'wasm'});
+   classifier = await transformers.pipeline('zero-shot-image-classification','Xenova/clip-vit-base-patch32',{device:'wasm', progress_callback: p => { if (p.status === 'progress' && p.progress != null) statusEl.textContent = 'Descargando modelo: ' + Math.round(p.progress) + '%'; else if (p.status) statusEl.textContent = 'Preparando modelo: ' + p.status; }});
   }
-  statusEl.textContent = 'Analizando la foto…';
-  const imageUrl = URL.createObjectURL(selectedFile);
-  let predictions;
-  try { predictions = await classifier(imageUrl, foods.map(f => 'a photo of ' + f[0]), {top_k:3}); }
-  finally { URL.revokeObjectURL(imageUrl); }
+  statusEl.textContent = 'Optimizando la foto y analizando…';
+  let imageForModel = selectedFile;
+  if ('createImageBitmap' in window) {
+   const bitmap = await createImageBitmap(selectedFile);
+   const scale = Math.min(1, 384 / Math.max(bitmap.width, bitmap.height));
+   const canvas = document.createElement('canvas');
+   canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+   canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+   canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+   bitmap.close(); imageForModel = canvas;
+  }
+  const predictions = await classifier(imageForModel, foods.map(f => 'a photo of ' + f[0]), {top_k:3});
   if (!predictions || !predictions.length) throw new Error('El modelo no devolvió resultados.');
   const best = predictions[0];
   const idx = foods.findIndex(f => 'a photo of ' + f[0] === best.label);
