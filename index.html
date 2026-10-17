@@ -122,9 +122,9 @@ $('gallery').addEventListener('change',e=>chooseFile(e.target.files[0]));
 function parseNutrition(text){
  const clean=text.replace(/,/g,'.').replace(/[|]/g,'I');
  const find=(patterns)=>{for(const p of patterns){const m=clean.match(p);if(m)return Number(m[1]);}return null;};
- const kcal=find([/(?:energ[ií]a|calor[ií]as|energy|calories|kcal)[^\\d]{0,25}(\\d{1,5}(?:\\.\\d+)?)/i,/(\\d{1,5}(?:\\.\\d+)?)\\s*kcal/i]);
- const protein=find([/(?:prote[ií]nas?|protein)[^\\d]{0,25}(\\d{1,4}(?:\\.\\d+)?)/i]);
- const sugar=find([/(?:az[uú]cares?|az[uú]car|sugars?|sugar)[^\\d]{0,25}(\\d{1,4}(?:\\.\\d+)?)/i]);
+ const kcal=find([/(?:energ[ií]a|calor[ií]as|energy|calories|kcal)[^\d]{0,25}(\d{1,5}(?:\.\d+)?)/i,/(\d{1,5}(?:\.\d+)?)\s*kcal/i]);
+ const protein=find([/(?:prote[ií]nas?|protein)[^\d]{0,25}(\d{1,4}(?:\.\d+)?)/i]);
+ const sugar=find([/(?:az[uú]cares?|az[uú]car|sugars?|sugar)[^\d]{0,25}(\d{1,4}(?:\.\d+)?)/i]);
  if(kcal!==null)$('kcal').value=kcal;
  if(protein!==null)$('protein').value=protein;
  if(sugar!==null)$('sugar').value=sugar;
