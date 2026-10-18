@@ -10,7 +10,7 @@
 <main><section class="card"><h1>Escanea tu plato</h1><p class="muted">Toma una foto desde arriba o elige una imagen de tu teléfono.</p>
 <div class="actions"><button id="takePhoto" type="button">📷 Tomar foto</button><button id="choosePhoto" type="button">🖼️ Elegir foto</button><input id="camera" type="file" accept="image/*" capture="environment"><input id="gallery" type="file" accept="image/*"></div><label for="portionSize" style="background:#e5f5ec;color:#075b40;margin:10px 0 8px">Tamaño de la porción</label><select id="portionSize" style="width:100%;padding:13px;border:1px solid #c9dfd1;border-radius:10px;font:16px system-ui;color:#173328;background:white"><option value="0.7">Pequeña (aprox. 70%)</option><option value="1" selected>Mediana / plato normal</option><option value="1.4">Grande (aprox. 140%)</option></select>
 <img id="preview" alt="Foto de tu comida"><button id="scan" disabled>Identificar comida y nutrientes</button><div id="status" aria-live="polite">Primero toma o elige una foto.</div>
-<div id="result" aria-live="polite"><div id="food"></div><div class="kcal" id="calories"></div><div class="macros"><div class="macro">Azúcares<strong id="sugar"></strong></div><div class="macro">Carbohidratos<strong id="carbs"></strong></div><div class="macro">Proteína<strong id="protein"></strong></div><div class="macro">Porción estimada<strong id="portion"></strong></div></div><p class="muted" id="details"></p></div></section>
+<div id="result" aria-live="polite"><div id="food"></div><div class="kcal" id="calories"></div><div class="macros"><div class="macro">Azúcares<strong id="sugar"></strong></div><div class="macro">Carbohidratos<strong id="carbs"></strong></div><div class="macro">Proteína<strong id="protein"></strong></div><div class="macro">Porción estimada<strong id="portion"></strong></div></div><p class="muted" id="details"></p><label for="correctFood" style="background:#e5f5ec;color:#075b40;margin:12px 0 6px">¿La comida identificada no es correcta?</label><select id="correctFood" style="width:100%;padding:12px;border:1px solid #c9dfd1;border-radius:10px;font:15px system-ui;color:#173328;background:white"><option value="">Elige la comida correcta para corregir la estimación</option></select><p class="muted" id="alternatives"></p></div></section>
 <p class="muted">La IA necesita internet para cargar el modelo. Los nutrientes son estimaciones. Elige el tamaño del plato para ajustar los rangos; una foto no puede medir con exactitud el peso, los ingredientes, el aceite ni el azúcar añadido.</p></main>
 <script>
 const $=id=>document.getElementById(id);let file=null,model=null;
@@ -39,15 +39,48 @@ const foods=[
 {en:'grilled chicken breast',es:'Pechuga de pollo',k:[200,400],s:[0,2],c:[0,8],p:[30,55]},
 {en:'french fries',es:'Papas fritas',k:[300,600],s:[0,3],c:[35,75],p:[3,8]},
 {en:'pancakes',es:'Panqueques',k:[300,600],s:[8,25],c:[40,85],p:[6,18]}
-];
+,
+{en:'Honduran baleadas with beans and cheese',es:'Baleadas hondureñas',k:[350,650],s:[2,8],c:[40,75],p:[12,25]},
+{en:'yuca with pork cracklings',es:'Yuca con chicharrón',k:[450,800],s:[1,8],c:[35,70],p:[15,30]},
+{en:'Honduran fried plantain slices',es:'Tajadas hondureñas',k:[350,650],s:[5,20],c:[40,80],p:[4,15]},
+{en:'Honduran pastelitos filled with meat or potatoes',es:'Pastelitos',k:[250,500],s:[1,8],c:[25,55],p:[7,18]},
+{en:'Honduran chicken enchiladas',es:'Enchiladas hondureñas',k:[300,550],s:[2,10],c:[25,50],p:[10,25]},
+{en:'Honduran tamal wrapped in banana leaves',es:'Tamal hondureño',k:[300,600],s:[2,12],c:[30,65],p:[8,22]},
+{en:'grilled beef steak',es:'Bistec de res',k:[250,500],s:[0,3],c:[0,10],p:[25,50]},
+{en:'stewed chicken with sauce',es:'Pollo guisado',k:[300,600],s:[2,12],c:[5,25],p:[25,45]},
+{en:'scrambled eggs',es:'Huevos revueltos',k:[150,350],s:[1,4],c:[1,8],p:[10,22]},
+{en:'boiled eggs',es:'Huevos cocidos',k:[70,160],s:[0,2],c:[0,2],p:[6,14]},
+{en:'corn tortillas',es:'Tortillas de maíz',k:[100,300],s:[0,3],c:[20,55],p:[3,8]},
+{en:'refried beans',es:'Frijoles molidos',k:[150,350],s:[1,5],c:[20,45],p:[7,16]},
+{en:'white rice and red beans',es:'Arroz con frijoles rojos',k:[300,550],s:[1,6],c:[50,85],p:[8,18]},
+{en:'grilled pork chops',es:'Chuleta de cerdo',k:[300,600],s:[0,4],c:[0,15],p:[22,42]},
+{en:'roast pork',es:'Cerdo asado',k:[300,600],s:[0,5],c:[0,15],p:[22,45]},
+{en:'roast chicken',es:'Pollo asado',k:[250,550],s:[0,5],c:[0,12],p:[25,50]},
+{en:'shrimp with vegetables',es:'Camarones con verduras',k:[200,450],s:[3,15],c:[10,35],p:[20,40]},
+{en:'tacos with meat',es:'Tacos de carne',k:[300,650],s:[1,8],c:[25,65],p:[12,30]},
+{en:'burrito with beans and meat',es:'Burrito de frijoles y carne',k:[450,850],s:[2,12],c:[45,95],p:[20,40]},
+{en:'hot dog',es:'Hot dog',k:[250,500],s:[3,15],c:[25,50],p:[8,20]},
+{en:'lasagna',es:'Lasaña',k:[350,650],s:[4,15],c:[30,65],p:[18,35]},
+{en:'sushi rolls',es:'Sushi',k:[250,500],s:[3,15],c:[35,75],p:[8,22]},
+{en:'fried doughnut',es:'Dona',k:[200,400],s:[10,30],c:[25,55],p:[3,8]},
+{en:'chocolate cake',es:'Pastel de chocolate',k:[300,550],s:[20,45],c:[35,75],p:[3,10]},
+{en:'ice cream in a bowl',es:'Helado',k:[150,400],s:[15,40],c:[20,55],p:[2,8]},
+{en:'bread rolls',es:'Pan',k:[150,400],s:[1,10],c:[30,75],p:[5,15]},
+{en:'cooked potatoes',es:'Papas cocidas',k:[150,350],s:[1,5],c:[30,65],p:[3,8]},
+{en:'green salad with dressing',es:'Ensalada con aderezo',k:[120,400],s:[3,15],c:[8,30],p:[2,10]},
+{en:'cooked lentils',es:'Lentejas',k:[180,400],s:[2,8],c:[30,65],p:[10,25]},
+{en:'banana',es:'Banano',k:[80,180],s:[10,25],c:[20,45],p:[1,3]},
+{en:'avocado slices',es:'Aguacate',k:[100,300],s:[0,2],c:[5,15],p:[1,5]},
+{en:'milk cereal in a bowl',es:'Cereal con leche',k:[200,450],s:[8,30],c:[30,75],p:[6,16]}];
 function choose(f){if(!f)return;if(!f.type.startsWith('image/')){$('status').textContent='Selecciona una imagen válida.';return}file=f;$('preview').src=URL.createObjectURL(f);$('preview').style.display='block';$('scan').disabled=false;$('result').style.display='none';$('status').textContent='Foto lista. Pulsa el botón verde para analizar.'}
 $('takePhoto').addEventListener('click',()=>{$('status').textContent='Abriendo la cámara…';$('camera').click()});$('choosePhoto').addEventListener('click',()=>{$('status').textContent='Abriendo tus fotos…';$('gallery').click()});$('camera').addEventListener('change',e=>{if(e.target.files&&e.target.files[0])choose(e.target.files[0]);else $('status').textContent='No se seleccionó ninguna foto. Pulsa Tomar foto para intentarlo de nuevo.'});$('gallery').addEventListener('change',e=>{if(e.target.files&&e.target.files[0])choose(e.target.files[0]);else $('status').textContent='No se seleccionó ninguna foto. Inténtalo otra vez.'});
-function range(v,factor=1){return Math.round(v[0]*factor)+'–'+Math.round(v[1]*factor)+' g'} function kcalRange(v,factor=1){return Math.round(v[0]*factor)+'–'+Math.round(v[1]*factor)+' kcal'}
+function range(v,factor=1){return Math.round(v[0]*factor)+'–'+Math.round(v[1]*factor)+' g'} function kcalRange(v,factor=1){return Math.round(v[0]*factor)+'–'+Math.round(v[1]*factor)+' kcal'} function showFood(item,scoreText=''){const factor=Number($('portionSize').value)||1;const sizeLabel=$('portionSize').selectedOptions[0].textContent;$('food').textContent='Comida identificada (posible): '+item.es;$('calories').textContent=kcalRange(item.k,factor);$('sugar').textContent=range(item.s,factor);$('carbs').textContent=range(item.c,factor);$('protein').textContent=range(item.p,factor);$('portion').textContent=sizeLabel.split(' (')[0];$('details').textContent='Rangos aproximados según la porción elegida. La foto no mide exactamente el peso, ingredientes, aceite ni azúcar añadido. '+scoreText;$('result').style.display='block';}
+$('correctFood').addEventListener('change',()=>{const idx=Number($('correctFood').value);if($('correctFood').value!==''&&foods[idx]){showFood(foods[idx],'Comida corregida manualmente por ti; los nutrientes siguen siendo aproximados.');$('status').textContent='Estimación actualizada con la comida que elegiste.';}});$('portionSize').addEventListener('change',()=>{const idx=Number($('correctFood').value);if($('correctFood').value!==''&&foods[idx])showFood(foods[idx],'Rangos aproximados según la porción elegida.');});
 $('scan').addEventListener('click',async()=>{if(!file)return;$('scan').disabled=true;$('result').style.display='none';
 try{if(!model){$('status').textContent='Cargando la IA por internet. Puede tardar la primera vez…';const lib=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2');lib.env.allowLocalModels=false;model=await lib.pipeline('zero-shot-image-classification','Xenova/clip-vit-base-patch32',{device:'wasm'});}
-$('status').textContent='Analizando la imagen…';const prompts=foods.map(f=>'a photo of '+f.en);const imageUrl=URL.createObjectURL(file);let predictions;try{predictions=await model(imageUrl,prompts,{top_k:1});}finally{URL.revokeObjectURL(imageUrl);}const p=predictions&&predictions[0];const idx=prompts.indexOf(p?.label);const item=idx>=0?foods[idx]:null;
+$('status').textContent='Analizando la imagen…';const prompts=foods.map(f=>'a photo of '+f.en);const imageUrl=URL.createObjectURL(file);let predictions;try{predictions=await model(imageUrl,prompts,{top_k:3});}finally{URL.revokeObjectURL(imageUrl);}const ranked=(predictions||[]).map(p=>({p,idx:prompts.indexOf(p.label)})).filter(x=>x.idx>=0);const first=ranked[0];const item=first?foods[first.idx]:null;
 if(!item)throw new Error('No se identificó la comida. Prueba con una foto más clara.');
-const factor=Number($('portionSize').value)||1;const sizeLabel=$('portionSize').selectedOptions[0].textContent;$('food').textContent='Comida identificada (posible): '+item.es;$('calories').textContent=kcalRange(item.k,factor);$('sugar').textContent=range(item.s,factor);$('carbs').textContent=range(item.c,factor);$('protein').textContent=range(item.p,factor);$('portion').textContent=sizeLabel.split(' (')[0];$('details').textContent='Rangos aproximados ajustados al tamaño que elegiste. La foto no puede medir por sí sola el peso, los ingredientes, el aceite ni el azúcar añadido. Coincidencia visual: '+Math.round((p.score||0)*100)+'% (esto no es precisión nutricional). Para mayor exactitud, pesa la porción o indica ingredientes y cantidades.';$('result').style.display='block';$('status').textContent='Análisis terminado.';
+const sel=$('correctFood');sel.innerHTML='<option value="">Elige la comida correcta para corregir la estimación</option>'+foods.map((f,i)=>'<option value="'+i+'">'+f.es+'</option>').join('');sel.value=String(first.idx);showFood(item,'La IA también considera: '+ranked.slice(1).map(x=>foods[x.idx].es).join(', ')+'. Si no coincide, corrígela en la lista. Coincidencia visual del primer resultado: '+Math.round((first.p.score||0)*100)+'%; no es una probabilidad garantizada.');$('alternatives').textContent='Otras opciones que la IA consideró: '+ranked.map(x=>foods[x.idx].es+' ('+Math.round((x.p.score||0)*100)+'%)').join(' · ');$('status').textContent='Análisis terminado. Revisa si el nombre coincide con tu plato.';
 }catch(err){console.error(err);$('status').textContent='No se pudo analizar. Comprueba internet e inténtalo de nuevo. '+(err?.message||'');}
 finally{$('scan').disabled=false;}});
 </script></body></html>
