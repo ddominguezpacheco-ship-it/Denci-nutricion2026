@@ -1,93 +1,53 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#087f5b">
-<title>NutriScan</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#087f5b"><title>NutriScan — Denci David</title>
 <style>
-:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#173328;background:#f3f8f5}
-*{box-sizing:border-box}body{margin:0}header{background:#087f5b;color:white;padding:24px 18px;border-radius:0 0 22px 22px}
-main{max-width:560px;margin:auto;padding:18px}.brand{font-size:28px;font-weight:800}header p{margin:4px 0;color:#e1fff0}
-.card{background:white;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 4px 18px #163d2410}
-h1{font-size:21px;margin:0 0 8px}p{line-height:1.45}.muted{font-size:14px;color:#63766c}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
-label,button{border:0;border-radius:12px;padding:14px 10px;font:700 15px system-ui;text-align:center;cursor:pointer}
-label{display:block;background:#e5f5ec;color:#075b40}label:first-child{background:#087f5b;color:white}
-input[type=file]{display:none}img{display:none;width:100%;max-height:330px;object-fit:contain;background:#eef3ef;border-radius:12px;margin:12px 0}
-button{width:100%;background:#087f5b;color:white}button:disabled{opacity:.5}
-#status{font-size:14px;color:#52665b;min-height:22px;overflow-wrap:anywhere;margin-top:12px}
-#result{display:none;background:#f2faf5;border:1px solid #d4e9dc;padding:14px;border-radius:14px;margin-top:14px}
-#food{font-size:19px;font-weight:750}.kcal{font-size:30px;font-weight:850;color:#087f5b}
-@media(max-width:360px){.actions{grid-template-columns:1fr}}
-</style>
-</head>
-<body>
-<header><div class="brand">🥗 NutriScan</div><p>Foto de tu comida → estimación de calorías</p></header>
-<main>
-<section class="card">
-<h1>Escanea tu plato</h1>
-<p class="muted">Toma una foto desde arriba o elige una de tu teléfono.</p>
-<div class="actions">
-<label for="camera">📷 Tomar foto</label>
-<label for="gallery">🖼️ Elegir foto</label>
-<input id="camera" type="file" accept="image/*" capture="environment">
-<input id="gallery" type="file" accept="image/*">
-</div>
-<img id="preview" alt="Foto de tu comida">
-<button id="scan" disabled>Identificar comida y calorías</button>
-<div id="status" aria-live="polite">Primero toma o elige una foto.</div>
-<div id="result" aria-live="polite"><div id="food"></div><div class="kcal" id="calories"></div><p class="muted" id="details"></p></div>
-</section>
-<p class="muted">Necesita internet para cargar el modelo de visión la primera vez. Las calorías son aproximadas: la foto no permite medir exactamente el peso ni los ingredientes.</p>
-</main>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#173328;background:#f3f8f5}*{box-sizing:border-box}body{margin:0}header{background:#087f5b;color:white;padding:24px 18px;border-radius:0 0 22px 22px}main{max-width:560px;margin:auto;padding:18px}.brand{font-size:27px;font-weight:800}header p{margin:4px 0;color:#e1fff0}.card{background:white;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 4px 18px #163d2410}h1{font-size:21px;margin:0 0 8px}.muted{font-size:14px;color:#63766c;line-height:1.45}.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}label,button{border:0;border-radius:12px;padding:14px 10px;font:700 15px system-ui;text-align:center;cursor:pointer}label{display:block;background:#e5f5ec;color:#075b40}label:first-child{background:#087f5b;color:white}input[type=file]{display:none}img{display:none;width:100%;max-height:330px;object-fit:contain;background:#eef3ef;border-radius:12px;margin:12px 0}button{width:100%;background:#087f5b;color:white}button:disabled{opacity:.5}#status{font-size:14px;color:#52665b;min-height:22px;overflow-wrap:anywhere;margin-top:12px}#result{display:none;background:#f2faf5;border:1px solid #d4e9dc;padding:14px;border-radius:14px;margin-top:14px}#food{font-size:19px;font-weight:750}.kcal{font-size:30px;font-weight:850;color:#087f5b}.macros{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.macro{background:white;border-radius:10px;padding:12px}.macro strong{display:block;font-size:19px;color:#087f5b}@media(max-width:360px){.actions{grid-template-columns:1fr}}
+</style></head>
+<body><header><div class="brand">🥗 NutriScan</div><p>Denci David · Foto de tu comida → nutrición estimada</p></header>
+<main><section class="card"><h1>Escanea tu plato</h1><p class="muted">Toma una foto desde arriba o elige una imagen de tu teléfono.</p>
+<div class="actions"><label for="camera">📷 Tomar foto</label><label for="gallery">🖼️ Elegir foto</label><input id="camera" type="file" accept="image/*" capture="environment"><input id="gallery" type="file" accept="image/*"></div>
+<img id="preview" alt="Foto de tu comida"><button id="scan" disabled>Identificar comida y nutrientes</button><div id="status" aria-live="polite">Primero toma o elige una foto.</div>
+<div id="result" aria-live="polite"><div id="food"></div><div class="kcal" id="calories"></div><div class="macros"><div class="macro">Azúcares<strong id="sugar"></strong></div><div class="macro">Carbohidratos<strong id="carbs"></strong></div><div class="macro">Proteína<strong id="protein"></strong></div><div class="macro">Porción estimada<strong id="portion"></strong></div></div><p class="muted" id="details"></p></div></section>
+<p class="muted">La IA necesita internet para cargar el modelo. Los nutrientes son aproximados para una porción común; una foto no puede medir con exactitud el peso, los ingredientes ni el aceite.</p></main>
 <script>
-const $=id=>document.getElementById(id);
-let file=null,model=null;
+const $=id=>document.getElementById(id);let file=null,model=null;
 const foods=[
-{en:'rice and beans',es:'Arroz con frijoles',min:350,max:600},
-{en:'chicken with rice',es:'Pollo con arroz',min:450,max:750},
-{en:'fried chicken and french fries',es:'Pollo frito con papas',min:650,max:1000},
-{en:'beef with rice and vegetables',es:'Carne con arroz y verduras',min:450,max:800},
-{en:'fried fish with rice',es:'Pescado frito con arroz',min:450,max:850},
-{en:'scrambled eggs and tortillas',es:'Huevos con tortillas',min:300,max:500},
-{en:'beans cheese and tortillas',es:'Frijoles, queso y tortillas',min:350,max:650},
-{en:'vegetable salad',es:'Ensalada',min:100,max:300},
-{en:'chicken soup',es:'Sopa de pollo',min:250,max:500},
-{en:'beef soup with vegetables',es:'Sopa de res',min:300,max:600},
-{en:'pupusas',es:'Pupusas',min:300,max:600},
-{en:'tamales',es:'Tamales',min:300,max:600},
-{en:'pizza',es:'Pizza',min:250,max:400},
-{en:'hamburger and french fries',es:'Hamburguesa con papas',min:700,max:1100},
-{en:'pasta with tomato sauce',es:'Pasta con salsa',min:350,max:650},
-{en:'fried plantains and beans',es:'Plátano frito con frijoles',min:350,max:650},
-{en:'sandwich',es:'Sándwich',min:300,max:600},
-{en:'fish and vegetables',es:'Pescado con verduras',min:300,max:600}
+{en:'rice and beans',es:'Arroz con frijoles',k:[350,600],s:[2,8],c:[55,95],p:[10,20]},
+{en:'chicken with rice',es:'Pollo con arroz',k:[450,750],s:[2,10],c:[50,90],p:[25,45]},
+{en:'fried chicken and french fries',es:'Pollo frito con papas',k:[650,1000],s:[1,8],c:[55,100],p:[20,40]},
+{en:'beef with rice and vegetables',es:'Carne con arroz y verduras',k:[450,800],s:[3,12],c:[45,85],p:[25,45]},
+{en:'fried fish with rice',es:'Pescado frito con arroz',k:[450,850],s:[1,8],c:[45,85],p:[20,40]},
+{en:'scrambled eggs and tortillas',es:'Huevos con tortillas',k:[300,500],s:[1,5],c:[25,50],p:[15,28]},
+{en:'beans cheese and tortillas',es:'Frijoles, queso y tortillas',k:[350,650],s:[2,8],c:[35,65],p:[15,28]},
+{en:'vegetable salad',es:'Ensalada de verduras',k:[100,300],s:[4,15],c:[10,30],p:[2,10]},
+{en:'chicken soup',es:'Sopa de pollo',k:[250,500],s:[2,10],c:[15,40],p:[18,35]},
+{en:'beef soup with vegetables',es:'Sopa de res',k:[300,600],s:[3,12],c:[15,45],p:[20,40]},
+{en:'pupusas',es:'Pupusas',k:[300,600],s:[1,6],c:[30,60],p:[10,25]},
+{en:'tamales',es:'Tamales',k:[300,600],s:[2,10],c:[30,65],p:[8,22]},
+{en:'pizza',es:'Pizza',k:[250,400],s:[3,10],c:[25,45],p:[10,20]},
+{en:'hamburger and french fries',es:'Hamburguesa con papas',k:[700,1100],s:[5,18],c:[70,130],p:[20,40]},
+{en:'pasta with tomato sauce',es:'Pasta con salsa de tomate',k:[350,650],s:[5,18],c:[55,100],p:[10,25]},
+{en:'fried plantains and beans',es:'Plátano frito con frijoles',k:[350,650],s:[8,25],c:[45,85],p:[8,18]},
+{en:'sandwich',es:'Sándwich',k:[300,600],s:[3,12],c:[30,65],p:[12,30]},
+{en:'fish and vegetables',es:'Pescado con verduras',k:[300,600],s:[3,15],c:[10,35],p:[22,40]},
+{en:'fruit salad',es:'Ensalada de frutas',k:[120,300],s:[18,40],c:[25,65],p:[1,5]},
+{en:'oatmeal with banana',es:'Avena con banano',k:[250,450],s:[8,25],c:[40,75],p:[6,15]},
+{en:'white rice',es:'Arroz blanco',k:[200,400],s:[0,2],c:[45,90],p:[4,9]},
+{en:'grilled chicken breast',es:'Pechuga de pollo',k:[200,400],s:[0,2],c:[0,8],p:[30,55]},
+{en:'french fries',es:'Papas fritas',k:[300,600],s:[0,3],c:[35,75],p:[3,8]},
+{en:'pancakes',es:'Panqueques',k:[300,600],s:[8,25],c:[40,85],p:[6,18]}
 ];
 function choose(f){if(!f)return;if(!f.type.startsWith('image/')){$('status').textContent='Selecciona una imagen válida.';return}file=f;$('preview').src=URL.createObjectURL(f);$('preview').style.display='block';$('scan').disabled=false;$('result').style.display='none';$('status').textContent='Foto lista. Pulsa el botón verde para analizar.'}
-$('camera').addEventListener('change',e=>choose(e.target.files[0]));
-$('gallery').addEventListener('change',e=>choose(e.target.files[0]));
-$('scan').addEventListener('click',async()=>{
- if(!file)return;
- $('scan').disabled=true;$('result').style.display='none';
- try{
-  if(!model){
-   $('status').textContent='Cargando el reconocedor (solo la primera vez). Mantén esta pantalla abierta…';
-   const lib=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2');
-   lib.env.allowLocalModels=false;
-   model=await lib.pipeline('zero-shot-image-classification','Xenova/clip-vit-base-patch32',{device:'wasm'});
-  }
-  $('status').textContent='Analizando la foto…';
-  const predictions=await model($('preview'),foods.map(f=>'a photo of '+f.en),{top_k:1});
-  const p=predictions&&predictions[0];const item=foods.find(f=>f.en===p?.label);
-  if(!item)throw new Error('No se reconoció la comida. Prueba otra foto con buena luz.');
-  $('food').textContent='Posible comida: '+item.es;
-  $('calories').textContent=item.min+'–'+item.max+' kcal';
-  $('details').textContent='Estimación para una porción común. Coincidencia visual aproximada: '+Math.round((p.score||0)*100)+'%. Este porcentaje no mide la precisión de las calorías.';
-  $('result').style.display='block';$('status').textContent='Análisis terminado.';
- }catch(err){console.error(err);$('status').textContent='No se pudo analizar. Revisa tu conexión a internet e inténtalo de nuevo. '+(err?.message||'')}
- finally{$('scan').disabled=false}
-});
-</script>
-</body>
-</html>
+$('camera').addEventListener('change',e=>choose(e.target.files[0]));$('gallery').addEventListener('change',e=>choose(e.target.files[0]));
+function range(v){return v[0]+'–'+v[1]+' g'}
+$('scan').addEventListener('click',async()=>{if(!file)return;$('scan').disabled=true;$('result').style.display='none';
+try{if(!model){$('status').textContent='Cargando la IA por internet. Puede tardar la primera vez…';const lib=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2');lib.env.allowLocalModels=false;model=await lib.pipeline('zero-shot-image-classification','Xenova/clip-vit-base-patch32',{device:'wasm'});}
+$('status').textContent='Analizando la imagen…';const prompts=foods.map(f=>'a photo of '+f.en);const predictions=await model($('preview'),prompts,{top_k:1});const p=predictions&&predictions[0];const idx=prompts.indexOf(p?.label);const item=idx>=0?foods[idx]:null;
+if(!item)throw new Error('No se identificó la comida. Prueba con una foto más clara.');
+$('food').textContent='Posible comida: '+item.es;$('calories').textContent=item.k[0]+'–'+item.k[1]+' kcal';$('sugar').textContent=range(item.s);$('carbs').textContent=range(item.c);$('protein').textContent=range(item.p);$('portion').textContent='1 plato';$('details').textContent='Estimación orientativa para una porción común. Coincidencia visual de la IA: '+Math.round((p.score||0)*100)+'%; no representa la precisión nutricional.';$('result').style.display='block';$('status').textContent='Análisis terminado.';
+}catch(err){console.error(err);$('status').textContent='No se pudo analizar. Comprueba internet e inténtalo de nuevo. '+(err?.message||'');}
+finally{$('scan').disabled=false;}});
+</script></body></html>
