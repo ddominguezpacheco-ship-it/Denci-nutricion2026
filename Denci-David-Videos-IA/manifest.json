@@ -1,11 +1,19 @@
 {
   "name": "Denci David Videos IA",
-  "short_name": "Videos IA",
+  "short_name": "Denci Videos",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0b1020",
   "theme_color": "#111827",
-  "description": "Crea historias y prompts para videos con IA",
-  "icons": []
+  "description": "Crea historias, escenas, narraciones y prompts para videos con IA.",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
