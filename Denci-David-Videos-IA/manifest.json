@@ -1,0 +1,11 @@
+{
+  "name": "Denci David Videos IA",
+  "short_name": "Videos IA",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b1020",
+  "theme_color": "#111827",
+  "description": "Crea historias y prompts para videos con IA",
+  "icons": []
+}
